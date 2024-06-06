@@ -1343,3 +1343,29 @@ func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 		testFunc(value)
 	}
 }
+
+func TestParsingClassExpressions(t *testing.T) {
+	input := `
+		kalasi Person { 
+		}`
+	l := lexer.New([]byte(input))
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	stmt := program.Statements[0].(*ast.ClassStatement)
+	if stmt.Name.Value != "Person" {
+		t.Fatalf("stmt.Name.Value not 'Person'. got=%q", stmt.Name.Value)
+	}
+	if len(stmt.Body.Statements) != 1 {
+		t.Fatalf("stmt.Body.Statements does not contain 1 statements. got=%d\n",
+			len(stmt.Body.Statements))
+	}
+	bodyStmt, ok := stmt.Body.Statements[0].(*ast.VariableDeclarationStatement)
+	if !ok {
+		t.Fatalf("stmt.Body.Statements[0] is not ast.VariableDeclarationStatement. got=%T",
+			stmt.Body.Statements[0])
+	}
+	if bodyStmt.Identifier.Value != "age" {
+		t.Fatalf("bodyStmt.Identifier.Value not 'age'. got=%s", bodyStmt.Identifier.Value)
+	}
+}
